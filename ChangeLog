@@ -1,3 +1,10 @@
+radish (0.01.28)
+
+  * Fix line number as int
+  * .lvimrc for vim-radish
+
+  -- Timo Furrer <tuxtimo@gmail.com>  Tue, 26 Nov 2013 12:56:04 +0100
+
 radish (0.01.16)
 
   * Installation Guide for windows
