@@ -51,7 +51,8 @@ class FileSystemHelper(object):
                 sys.path.insert(0, root)
                 module_name = cls.filename(f, False)
                 try:
-                    __import__(module_name)
+                    module = __import__(module_name)
+                    reload(module)
                     sys.path.remove(root)
                 except ValueError, e:
                     if "empty module name" in traceback.format_exc(e).lower():
