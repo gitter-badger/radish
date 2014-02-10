@@ -36,24 +36,35 @@ class XunitWriter(object):
             if filename == XunitWriter.ONE_XUNIT:
                 filename = Config().xunit_file or XunitWriter.REPORT_FILENAME
 
-            testsuite = etree.Element(
-                "testsuite",
-                name="radish",
-                hostname="localhost",
-                id=unicode(Config().marker),
-                time=str(sum([f.get_duration() for f in features])),
-                tests=str(self._endResult.get_total_steps()),
-                failures=str(self._endResult.get_failed_steps()),
-                skipped=str(self._endResult.get_skipped_steps()),
-                errors="0",
-                timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            )
+            testsuites = etree.Element("testsuites")
 
-            # append steps to testsuite
             for f in features:
+                testsuite = etree.Element(
+                    "testsuite",
+                    name="radish",
+                    hostname="localhost",
+                    id=unicode(Config().marker),
+                    time=str(f.get_duration()),
+                    tests=str(sum([len(s.get_steps()) for s in f.get_scenarios()])),
+                    failures=str(sum([sum([step.has_passed() is False for step in s.get_steps()]) for s in f.get_scenarios()])),
+                    skipped=str(sum([sum([step.has_passed() is None for step in s.get_steps()]) for s in f.get_scenarios()])),
+                    errors="0",
+                    timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                )
+
+                # append feature description to testsuite
+                description = etree.Element(
+                    "description",
+                )
+                description.text = etree.CDATA(f.get_description())
+                testsuite.append(description)
+
+                # append steps to testsuite
                 for s in f.get_scenarios():
                     for step in s.get_steps():
                         testsuite.append(step.get_report_as_xunit_tag())
 
+                testsuites.append(testsuite)
+
             with open(filename, "w") as f:
-                f.write(etree.tostring(testsuite, pretty_print=True, xml_declaration=True, encoding="utf-8"))
+                f.write(etree.tostring(testsuites, pretty_print=True, xml_declaration=True, encoding="utf-8"))
