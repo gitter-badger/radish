@@ -7,6 +7,7 @@ import os
 import sys
 import time
 
+from datetime import datetime
 from docopt import docopt
 from radish.colorful import colorful
 
@@ -19,6 +20,7 @@ Usage:
            [-m=<marker> | --marker=<marker>] [-p=<profile> | --profile=<profile>]
            [-d | --dry-run] [-a | --abort-fail]
            [-t | --with-traceback]
+           [-r=<output> | --result-file=<output>]
            [-x=<output> | --xunit-file=<output> [--split-xunit]]
            [--no-colors] [--no-line-jump] [--no-overwrite]
            [--no-indentation] [--no-duration] [--no-numbers]
@@ -42,6 +44,8 @@ Options:
     -a --abort-fail                      abort run if one step fails
     -p=<profile> --profile=<profile>     define porfile which you can use in your step implementation
     -t --with-traceback                  print traceback if a step fails
+
+    -r=<output> --result-file=<output>   generate radish result file after run at specfic location
 
     -x=<output> --xunit-file=<output>    generate xunit file after run at specific location
     --split-xunit                        split the xunit file into multiple files - one file per inputted feature file
@@ -129,6 +133,7 @@ def after_each_step(step):
         cf.marker = time.time() if arguments["--marker"] == "time.time()" else arguments["--marker"]
         cf.create_basedir = arguments["--create-basedir"]
         cf.dry_run = arguments["--dry-run"]
+        cf.result_file = arguments["--result-file"]
         cf.xunit_file = arguments["--xunit-file"]
         cf.split_xunit = arguments["--split-xunit"]
         cf.profile = arguments["--profile"]
@@ -161,8 +166,14 @@ def after_each_step(step):
                 raise radish.NoMetricUtilFoundError()
         else:  # normal run
             # run the features
+            starttime = datetime.now()
             runner = radish.Runner(fp.get_features())
             endResult = runner.run()
+            endtime = datetime.now()
+
+            if cf.result_file:
+                resultfile = radish.ResultWriter(endResult, starttime, endtime)
+                resultfile.generate()
 
             # report writer
             if cf.xunit_file:

@@ -3,18 +3,19 @@
 import traceback
 import inspect
 import sys
-import datetime
 import re
 
+from radish.timetracker import Timetracker
 from radish.config import Config
 from radish.utilregistry import UtilRegistry
 from radish.exceptions import ValidationError, RadishError
 
 
-class Step(object):
+class Step(Timetracker):
     CHARS_PER_LINE = 100
 
     def __init__(self, id, scenario, sentence, filename, line_no):
+        Timetracker.__init__(self)
         self._id = id
         self._scenario = scenario
         self._sentence = sentence
@@ -25,8 +26,6 @@ class Step(object):
         self._match = None
         self._passed = None
         self._fail_reason = None
-        self._starttime = None
-        self._endtime = None
         self._validation_error = False
 
     def get_id(self):
@@ -86,12 +85,6 @@ class Step(object):
     def has_passed(self):
         return self._passed
 
-    def get_duration(self):
-        if self._passed is True or self._passed is False:
-            td = self._endtime - self._starttime
-            return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 1e6) / 1e6
-        return 0
-
     def get_fail_reason(self):
         return self._fail_reason
 
@@ -123,7 +116,7 @@ class Step(object):
     def run(self):
         kw = self._match.groupdict()
         try:
-            self._starttime = datetime.datetime.now()
+            self.start_timetracking()
             if kw:
                 self._function(self, **kw)
             else:
@@ -137,7 +130,7 @@ class Step(object):
             if self.is_dry_run():
                 caller = inspect.trace()[-1]
                 sys.stderr.write("%s:%d: error: %s\n" % (caller[1], caller[2], self._fail_reason.get_reason().encode("utf-8")))
-        self._endtime = datetime.datetime.now()
+        self.stop_timetracking()
         return self._passed
 
     def ValidationError(self, msg):

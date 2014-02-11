@@ -2,12 +2,14 @@
 
 import os
 
+from radish.timetracker import Timetracker
 from radish.config import Config
 from radish.scenario import Scenario
 
 
-class Feature(object):
+class Feature(Timetracker):
     def __init__(self, id, sentence, filename, line_no):
+        Timetracker.__init__(self)
         self._id = id
         self._sentence = sentence
         self._filename = filename
@@ -38,12 +40,6 @@ class Feature(object):
 
     def get_indentation(self):
         return "  "
-
-    def get_duration(self):
-        d = 0
-        for s in self._scenarios:
-            d += s.get_duration()
-        return d
 
     def is_dry_run(self):
         return Config().dry_run

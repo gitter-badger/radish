@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import traceback
 
 from radish.config import Config
 from radish.colorful import colorful
@@ -25,15 +24,20 @@ class Runner(object):
 
         if not abort:
             for f in self._features:
+                f.start_timetracking()
                 e = hr.call_hook("before", "feature", f)
                 if e is not None:
                     self._print_traceback(e)
+                    f.stop_timetracking()
                     return self._create_endresult()
 
                 for s in f.get_scenarios():
+                    s.start_timetracking()
                     e = hr.call_hook("before", "scenario", s)
                     if e is not None:
                         self._print_traceback(e)
+                        s.stop_timetracking()
+                        f.stop_timetracking()
                         return self._create_endresult()
                     skip_remaining_steps = False
 
@@ -41,6 +45,8 @@ class Runner(object):
                         e = hr.call_hook("before", "step", step)
                         if e is not None:
                             self._print_traceback(e)
+                            s.stop_timetracking()
+                            f.stop_timetracking()
                             return self._create_endresult()
 
                         if not skip_remaining_steps and not interrupted:
@@ -57,27 +63,35 @@ class Runner(object):
                         e = hr.call_hook("after", "step", step)
                         if e is not None:
                             self._print_traceback(e)
+                            s.stop_timetracking()
+                            f.stop_timetracking()
                             return self._create_endresult()
                     e = hr.call_hook("after", "scenario", s)
                     if e is not None:
                         self._print_traceback(e)
+                        s.stop_timetracking()
+                        f.stop_timetracking()
                         return self._create_endresult()
                     if abort:  # if -a is set
                         break
+                    s.stop_timetracking()
                 e = hr.call_hook("after", "feature", f)
                 if e is not None:
                     self._print_traceback(e)
+                    f.stop_timetracking()
                     return self._create_endresult()
                 if abort:  # if -a is set
                     break
+                f.stop_timetracking()
         return self._create_endresult()
 
     def _print_traceback(self, fail_reason):
-        print(colorful.bold_red(fail_reason.get_name())
-                + colorful.red(" exception caught from external hook at ")
-                + colorful.bold_red(fail_reason.get_filename())
-                + colorful.red(":")
-                + colorful.bold_red(str(fail_reason.get_line_no())))
+        print(colorful.bold_red(
+            fail_reason.get_name())
+            + colorful.red(" exception caught from external hook at ")
+            + colorful.bold_red(fail_reason.get_filename())
+            + colorful.red(":")
+            + colorful.bold_red(str(fail_reason.get_line_no())))
         if Config().with_traceback:
             for l in fail_reason.get_traceback().splitlines():
                 colorful.out.red("  " + l)
