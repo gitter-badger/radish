@@ -21,10 +21,10 @@ class Timetracker(object):
         self._endtime = datetime.now()
 
     def get_starttime(self):
-        return self._starttime
+        return self._starttime or datetime(1970, 1, 1, 0, 0)
 
     def get_endtime(self):
-        return self._endtime
+        return self._endtime or datetime(1970, 1, 1, 0, 0)
 
     def get_duration(self):
         if self._starttime is not None and self._endtime is not None:
