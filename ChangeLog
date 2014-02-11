@@ -1,3 +1,9 @@
+radish (0.01.29)
+
+  * New result writer
+
+  -- Timo Furrer <tuxtimo@gmail.com>  Tue, 11 Feb 2014 08:44:22 +0100
+
 radish (0.01.28)
 
   * Fix line number as int
