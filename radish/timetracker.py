@@ -29,5 +29,9 @@ class Timetracker(object):
     def get_duration(self):
         if self._starttime is not None and self._endtime is not None:
             td = self._endtime - self._starttime
-            return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 1e6) / 1e6
+            return Timetracker.get_total_seconds(td)
         return 0
+
+    @staticmethod
+    def get_total_seconds(timedelta):
+        return (timedelta.microseconds + (timedelta.seconds + timedelta.days * 24 * 3600) * 1e6) / 1e6

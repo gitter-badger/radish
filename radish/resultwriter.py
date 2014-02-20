@@ -2,6 +2,7 @@
 
 from radish.exceptions import RadishError
 from radish.config import Config
+from radish.timetracker import Timetracker
 
 from getpass import getuser
 from socket import gethostname
@@ -26,7 +27,7 @@ class ResultWriter(object):
             "testrun",
             starttime=self._starttime.strftime("%Y-%m-%dT%H:%M:%S"),
             endtime=self._endtime.strftime("%Y-%m-%dT%H:%M:%S"),
-            duration=str((self._endtime - self._starttime).total_seconds()),
+            duration=str(Timetracker.get_total_seconds(self._endtime - self._starttime)),
             agent="%s@%s" % (getuser(), gethostname())
         )
 
