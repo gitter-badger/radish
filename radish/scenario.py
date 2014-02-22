@@ -3,6 +3,7 @@
 from radish.timetracker import Timetracker
 from radish.config import Config
 from radish.step import Step
+from radish.colorful import colorful
 
 
 class Scenario(Timetracker):
@@ -50,6 +51,16 @@ class Scenario(Timetracker):
             elif s.has_passed():
                 skipped = False
         return None if skipped else True
+
+    def get_representation(self):
+        output = ""
+        if not Config().no_indentation:
+            output += self.get_indentation()
+        if not Config().no_numbers:
+            output += colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_scenario_id)), self._id))
+        if Config().with_section_names:
+            output += colorful.bold_white("Scenario: ")
+        return output + colorful.bold_white(self._sentence) + "\n"
 
     def append_step(self, step):
         if isinstance(step, Step):

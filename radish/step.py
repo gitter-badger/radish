@@ -9,6 +9,7 @@ from radish.timetracker import Timetracker
 from radish.config import Config
 from radish.utilregistry import UtilRegistry
 from radish.exceptions import ValidationError, RadishError
+from radish.colorful import colorful
 
 
 class Step(Timetracker):
@@ -112,6 +113,49 @@ class Step(Timetracker):
 
         def get_line_no(self):
             return self._line_no
+
+    def get_representation(self, ran):
+        output = ""
+        if ran:
+            splitted = self.get_sentence_splitted()
+            if not Config().no_line_jump and not Config().no_overwrite:
+                output += "\033[A\033[K" * splitted[0]
+
+            if self._passed is None and Config().no_skipped_steps:
+                return
+
+            if self._passed:
+                color_fn = colorful.bold_green
+            elif self._passed is False:
+                color_fn = colorful.bold_red
+            elif self._passed is None:
+                color_fn = colorful.cyan
+
+            if not Config().no_overwrite:
+                if not Config().no_indentation:
+                    output += self.get_indentation()
+                if not Config().no_numbers:
+                    output += color_fn("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_step_id)), self._id))
+                output += color_fn(splitted[1]) + "\n"
+
+            if self._passed is False:
+                if Config().with_traceback:
+                    for l in self._fail_reason.get_traceback().splitlines():
+                        if not Config().no_indentation:
+                            output += self.get_sentence_indentation()
+                        output += colorful.red(l) + "\n"
+                else:
+                    if not Config().no_indentation:
+                        output += self.get_sentence_indentation()
+                    output += colorful.red(self._fail_reason.get_name() + ": ") + colorful.bold_red(self._fail_reason.get_reason()) + "\n"
+        else:
+            if not Config().no_indentation:
+                output += self.get_indentation()
+            if not Config().no_numbers:
+                output += colorful.bold_brown("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_step_id)), self._id))
+            output += colorful.bold_brown(self.get_sentence_splitted()[1]) + "\n"
+
+        return output
 
     def run(self):
         kw = self._match.groupdict()

@@ -5,6 +5,8 @@ import os
 from radish.timetracker import Timetracker
 from radish.config import Config
 from radish.scenario import Scenario
+from radish.colorful import colorful
+from radish.filesystemhelper import FileSystemHelper as fsh
 
 
 class Feature(Timetracker):
@@ -64,6 +66,23 @@ class Feature(Timetracker):
             elif s.has_passed():
                 skipped = False
         return None if skipped else True
+
+    def get_representation(self):
+        output = ""
+        if not Config().no_indentation:
+            output += self.get_indentation()
+        if not Config().no_numbers:
+            output += colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_feature_id)), self._id))
+        if Config().with_section_names:
+            output += colorful.bold_white("Feature: ")
+
+        output += colorful.bold_white(self._sentence + " " * (Config().longest_feature_text - len(self._sentence)))
+        output += " " * 10 + colorful.bold_black("# " + fsh.filename(self._filename)) + "\n"
+        for l in self._description.splitlines():
+            if not Config().no_indentation:
+                output += self.get_indentation() + " " * len(str(Config().highest_feature_id)) + "  "
+            output += colorful.white(l) + "\n"
+        return output + "\n"
 
     def append_scenario(self, scenario):
         if isinstance(scenario, Scenario):

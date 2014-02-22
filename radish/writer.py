@@ -5,40 +5,19 @@ import sys
 from radish.colorful import colorful
 from radish.config import Config
 from radish.hookregistry import after, before
-from radish.filesystemhelper import FileSystemHelper as fsh
 
 
 @before.each_feature
 def print_before_feature(feature):
     if not feature.is_dry_run():
-        if not Config().no_indentation:
-            sys.stdout.write(feature.get_indentation())
-        if not Config().no_numbers:
-            sys.stdout.write(colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_feature_id)), feature.get_id())))
-        if Config().with_section_names:
-            sys.stdout.write(colorful.bold_white("Feature: "))
-        sys.stdout.write(colorful.bold_white(feature.get_sentence() + " " * (Config().longest_feature_text - len(feature.get_sentence()))))
-        sys.stdout.write(" " * 10 + colorful.bold_black("# " + fsh.filename(feature.get_filename())))
-        sys.stdout.write("\n")
-        for l in feature.get_description().splitlines():
-            if not Config().no_indentation:
-                sys.stdout.write(feature.get_indentation() + " " * len(str(Config().highest_feature_id)) + "  ")
-            colorful.out.white(l)
-        sys.stdout.write("\n")
+        sys.stdout.write(feature.get_representation())
         sys.stdout.flush()
 
 
 @before.each_scenario
 def print_before_scenario(scenario):
     if not scenario.is_dry_run():
-        if not Config().no_indentation:
-            sys.stdout.write(scenario.get_indentation())
-        if not Config().no_numbers:
-            sys.stdout.write(colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_scenario_id)), scenario.get_id())))
-        if Config().with_section_names:
-            sys.stdout.write(colorful.bold_white("Scenario: "))
-        sys.stdout.write(colorful.bold_white(scenario.get_sentence()))
-        sys.stdout.write("\n")
+        sys.stdout.write(scenario.get_representation())
         sys.stdout.flush()
 
 
@@ -52,50 +31,14 @@ def print_after_scenario(scenario):
 @before.each_step
 def print_before_step(step):
     if not step.is_dry_run():
-        if not Config().no_indentation:
-            sys.stdout.write(step.get_indentation())
-        if not Config().no_numbers:
-            sys.stdout.write(colorful.bold_brown("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_step_id)), step.get_id())))
-        sys.stdout.write(colorful.bold_brown(step.get_sentence_splitted()[1]))
-        sys.stdout.write("\n")
+        sys.stdout.write(step.get_representation(ran=False))
         sys.stdout.flush()
 
 
 @after.each_step
 def print_after_step(step):
     if not step.is_dry_run():
-        splitted = step.get_sentence_splitted()
-        if not Config().no_line_jump and not Config().no_overwrite:
-            sys.stdout.write("\033[A\033[K" * splitted[0])
-
-        if step.has_passed() is None and Config().no_skipped_steps:
-            return
-
-        if step.has_passed():
-            color_fn = colorful.bold_green
-        elif step.has_passed() is False:
-            color_fn = colorful.bold_red
-        elif step.has_passed() is None:
-            color_fn = colorful.cyan
-
-        if not Config().no_overwrite:
-            if not Config().no_indentation:
-                sys.stdout.write(step.get_indentation())
-            if not Config().no_numbers:
-                sys.stdout.write(color_fn("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_step_id)), step.get_id())))
-            sys.stdout.write(color_fn(splitted[1]))
-            sys.stdout.write("\n")
-
-        if step.has_passed() is False:
-            if Config().with_traceback:
-                for l in step.get_fail_reason().get_traceback().splitlines():
-                    if not Config().no_indentation:
-                        sys.stdout.write(step.get_sentence_indentation())
-                    colorful.out.red(l)
-            else:
-                if not Config().no_indentation:
-                    sys.stdout.write(step.get_sentence_indentation())
-                print(colorful.red(step.get_fail_reason().get_name() + ": ") + colorful.bold_red(step.get_fail_reason().get_reason()))
+        sys.stdout.write(step.get_representation(ran=True))
         sys.stdout.flush()
 
 
