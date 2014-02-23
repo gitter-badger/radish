@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from radish.scenariooutline import ScenarioOutline
+
 
 class EndResult(object):
     def __init__(self, features):
@@ -30,9 +32,10 @@ class EndResult(object):
             elif feature_outcome is None:
                 self._skipped_features += 1
 
-            self._total_scenarios += len(f.get_scenarios())
+            scenarios = [s for s in f.get_scenarios() if not isinstance(s, ScenarioOutline)]
+            self._total_scenarios += len(scenarios)
 
-            for s in f.get_scenarios():
+            for s in scenarios:
                 scenario_outcome = s.has_passed()
                 if scenario_outcome:
                     self._passed_scenarios += 1

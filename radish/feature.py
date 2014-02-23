@@ -12,12 +12,16 @@ from radish.filesystemhelper import FileSystemHelper as fsh
 class Feature(Timetracker):
     def __init__(self, id, sentence, filename, line_no):
         Timetracker.__init__(self)
+        self._title = "Feature"
         self._id = id
         self._sentence = sentence
         self._filename = filename
         self._line_no = line_no
         self._scenarios = []
         self._description = ""
+
+    def get_title(self):
+        return self._title
 
     def get_id(self):
         return self._id
@@ -74,7 +78,7 @@ class Feature(Timetracker):
         if not Config().no_numbers:
             output += colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_feature_id)), self._id))
         if Config().with_section_names:
-            output += colorful.bold_white("Feature: ")
+            output += colorful.bold_white("%s: " % self._title)
 
         output += colorful.bold_white(self._sentence + " " * (Config().longest_feature_text - len(self._sentence)))
         output += " " * 10 + colorful.bold_black("# " + fsh.filename(self._filename)) + "\n"

@@ -3,6 +3,7 @@
 from radish.exceptions import RadishError
 from radish.config import Config
 from radish.timetracker import Timetracker
+from radish.scenariooutline import ScenarioOutline
 
 from getpass import getuser
 from socket import gethostname
@@ -48,7 +49,7 @@ class ResultWriter(object):
 
             scenarios_element = etree.Element("scenarios")
 
-            for scenario in feature.get_scenarios():
+            for scenario in [s for s in feature.get_scenarios() if not isinstance(s, ScenarioOutline)]:
                 scenario_element = etree.Element(
                     "scenario",
                     sentence=scenario.get_sentence(),

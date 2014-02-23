@@ -4,6 +4,7 @@ from radish.config import Config
 from radish.stepregistry import StepRegistry
 from radish.filesystemhelper import FileSystemHelper as fsh
 from radish.exceptions import StepDefinitionFileNotFoundError, StepDefinitionNotFoundError
+from radish.outlinedstep import OutlinedStep
 
 
 class Loader(object):
@@ -33,7 +34,7 @@ class Loader(object):
         sr = StepRegistry()
         for feature in self._features:
             for scenario in feature.get_scenarios():
-                for step in scenario.get_steps():
+                for step in [s for s in scenario.get_steps() if not isinstance(s, OutlinedStep)]:
                     match, func, metric_indicators = sr.find(step.get_sentence())
                     if match and func:
                         step.set_function(func)

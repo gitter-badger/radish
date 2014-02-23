@@ -5,7 +5,11 @@ from radish.config import *
 from radish.featureparser import *
 from radish.feature import *
 from radish.scenario import *
+from radish.scenariooutline import *
+from radish.scenariooutlineexample import *
 from radish.step import *
+from radish.outlinedstep import *
+from radish.outlinestep import *
 from radish.runner import *
 from radish.loader import *
 from radish.filesystemhelper import *

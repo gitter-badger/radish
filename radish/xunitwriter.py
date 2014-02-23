@@ -6,6 +6,7 @@ from datetime import datetime
 from radish.config import Config
 from radish.filesystemhelper import FileSystemHelper as fsh
 from radish.exceptions import RadishError
+from radish.scenariooutline import ScenarioOutline
 
 
 class XunitWriter(object):
@@ -51,7 +52,7 @@ class XunitWriter(object):
 
             # append steps to testsuite
             for f in features:
-                for s in f.get_scenarios():
+                for s in [s for s in f.get_scenarios() if not isinstance(s, ScenarioOutline)]:
                     for step in s.get_steps():
                         testsuite.append(step.get_report_as_xunit_tag())
 

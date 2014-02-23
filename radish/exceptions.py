@@ -11,11 +11,12 @@ class RadishError(Exception):
 
 class FeatureFileNotValidError(RadishError):
     """Raised when a feature file could not be parsed"""
-    def __init__(self, feature_file):
+    def __init__(self, feature_file, message):
         self._feature_file = feature_file
+        self._message = message
 
     def __str__(self):
-        return "The feature file '%s' is not valid" % (self._feature_file)
+        return "The feature file '%s' is not valid: %s" % (self._feature_file, self._message)
 
 
 class StepLoadingError(RadishError):

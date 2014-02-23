@@ -9,12 +9,16 @@ from radish.colorful import colorful
 class Scenario(Timetracker):
     def __init__(self, id, feature, sentence, filename, line_no):
         Timetracker.__init__(self)
+        self._title = "Scenario"
         self._id = id
         self._feature = feature
         self._sentence = sentence
         self._filename = filename
         self._line_no = line_no
         self._steps = []
+
+    def get_title(self):
+        return self._title
 
     def get_id(self):
         return self._id
@@ -52,15 +56,20 @@ class Scenario(Timetracker):
                 skipped = False
         return None if skipped else True
 
-    def get_representation(self):
+    def get_representation(self, ran):
         output = ""
-        if not Config().no_indentation:
-            output += self.get_indentation()
-        if not Config().no_numbers:
-            output += colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_scenario_id)), self._id))
-        if Config().with_section_names:
-            output += colorful.bold_white("Scenario: ")
-        return output + colorful.bold_white(self._sentence) + "\n"
+        if ran:
+            output = "\n"
+        else:
+            if not Config().no_indentation:
+                output += self.get_indentation()
+            if not Config().no_numbers:
+                output += colorful.bold_white("%*d. " % (0 if Config().no_indentation else len(str(Config().highest_scenario_id)), self._id))
+            if Config().with_section_names:
+                output += colorful.bold_white("%s: " % self._title)
+            output += colorful.bold_white(self._sentence) + "\n"
+        return output
+
 
     def append_step(self, step):
         if isinstance(step, Step):

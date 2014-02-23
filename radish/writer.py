@@ -17,14 +17,14 @@ def print_before_feature(feature):
 @before.each_scenario
 def print_before_scenario(scenario):
     if not scenario.is_dry_run():
-        sys.stdout.write(scenario.get_representation())
+        sys.stdout.write(scenario.get_representation(ran=False))
         sys.stdout.flush()
 
 
 @after.each_scenario
 def print_after_scenario(scenario):
     if not scenario.is_dry_run():
-        sys.stdout.write("\n")
+        sys.stdout.write(scenario.get_representation(ran=True))
         sys.stdout.flush()
 
 
