@@ -45,6 +45,30 @@ def fail_after_times(step, times):
     print world.fail_after_times_count
     world.fail_after_times_count += 1
 
+@step(u'I have a address table')
+def I_have_a_address_card(step, Table):
+    rows = Table.create_set()
+    assert len(rows) == 2
+    assert rows[0].Name     == "Hans"
+    assert rows[0].Lastname == "Dampf"
+    assert rows[0].Street   == "In allen Gassen"
+    assert rows[0].ZIP      == "4242"
+    assert rows[0].City     == "Buxdehude"
+    assert rows[1].Name     == "Donald"
+    assert rows[1].Lastname == "Duck"
+    assert rows[1].Street   == "I don't know"
+    assert rows[1].ZIP      == "1234"
+    assert rows[1].City     == "Entenhausen"
+
+@step(u'I have a address card')
+def I_have_a_address_card(step, Table):
+    """ Use a table as a single instance object """
+    prop = Table.create_instance()
+    assert prop.Name == "Hans"
+    assert prop.Lastname == "Dampf"
+    assert prop.Street == "In allen Gassen"
+    assert prop.ZIP == "4242"
+    assert prop.City == "Buxdehude"
 
 def factorial(number):
     from math import factorial
