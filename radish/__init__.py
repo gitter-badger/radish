@@ -10,6 +10,7 @@ from radish.scenariooutlineexample import *
 from radish.step import *
 from radish.outlinedstep import *
 from radish.outlinestep import *
+from radish.table import *
 from radish.runner import *
 from radish.loader import *
 from radish.filesystemhelper import *

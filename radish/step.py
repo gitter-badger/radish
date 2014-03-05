@@ -10,6 +10,7 @@ from radish.config import Config
 from radish.utilregistry import UtilRegistry
 from radish.exceptions import ValidationError, RadishError
 from radish.colorful import colorful
+from radish.table import Table
 
 
 class Step(Timetracker):
@@ -28,6 +29,10 @@ class Step(Timetracker):
         self._passed = None
         self._fail_reason = None
         self._validation_error = False
+        self._table = Table()
+
+    def get_table(self):
+        return self._table
 
     def get_id(self):
         return self._id
@@ -164,7 +169,10 @@ class Step(Timetracker):
             if kw:
                 self._function(self, **kw)
             else:
-                self._function(self, *self._match.groups())
+                if self._table.length() > 0:
+                    self._function(self, *self._match.groups(), Table=self._table)
+                else:
+                    self._function(self, *self._match.groups())
             self._passed = not self._validation_error
         except KeyboardInterrupt:
             raise

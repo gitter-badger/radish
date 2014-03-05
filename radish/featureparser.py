@@ -35,6 +35,7 @@ class FeatureParser(object):
         self._scenario_pattern = re.compile("Scenario: ?(.*)$")
         self._scenario_outline_pattern = re.compile("Scenario Outline: ?(.*)$")
         self._scenario_outline_examples_pattern = re.compile("Examples:$")
+        self._table_pattern = re.compile("^[\s]*\|(.*)\|[\s]*$")
         self._loop_modifier_pattern = re.compile("run (\d+) times")
 
     def get_features(self):
@@ -166,6 +167,12 @@ class FeatureParser(object):
                     if scenario_id > Config().highest_scenario_id:
                         Config().highest_scenario_id = scenario_id
                     continue
+
+            table_match = self._table_pattern.search(l)
+            if table_match: # append a table to the step
+                if not in_feature:
+                    features[-1].get_scenarios()[-1].get_steps()[-1].get_table().append(columns=table_match.group(1).split("|"));
+                continue
 
             # create new step or append feature description line
             line = l.rstrip(os.linesep).strip()
