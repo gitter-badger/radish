@@ -117,14 +117,14 @@ class Step(Timetracker):
             return self._line_no
 
     def get_representation(self, ran):
-        output = ""
+        output = "\r"
         if ran:
             splitted = self.get_sentence_splitted()
             if not Config().no_line_jump and not Config().no_overwrite:
                 output += "\033[A\033[K" * splitted[0]
 
             if self._passed is None and Config().no_skipped_steps:
-                return
+                return output
 
             if self._passed:
                 color_fn = colorful.bold_green
