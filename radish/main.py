@@ -6,10 +6,21 @@ import radish
 import os
 import sys
 import time
+import signal
 
 from datetime import datetime
 from docopt import docopt
 from radish.colorful import colorful
+
+
+def signal_handler(signal, frame):
+    global runner
+    if runner:
+        runner.abort()
+
+
+runner = None
+signal.signal(signal.SIGINT, signal_handler)
 
 
 def main():
@@ -62,6 +73,8 @@ Options:
     --show-metrics                       show metrics of given feature files after run
 
 (C) Copyright 2013 by Timo Furrer <tuxtimo@gmail.com>"""
+
+    global runner
 
     arguments = docopt("radish %s\n%s" % (radish.version.__version__, main.__doc__), version=radish.version.__version__)
 
@@ -158,10 +171,7 @@ def after_each_step(step):
             ur = radish.UtilRegistry()
             if ur.has_util("show_metrics"):
                 metrics = radish.Metrics(fp.get_features())
-                try:
-                    return ur.call_util("show_metrics", fp.get_features(), metrics.calculate())
-                except KeyboardInterrupt:
-                    pass
+                return ur.call_util("show_metrics", fp.get_features(), metrics.calculate())
             else:
                 raise radish.NoMetricUtilFoundError()
         else:  # normal run

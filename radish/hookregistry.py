@@ -9,7 +9,8 @@ class HookRegistry(object):
     hooks = {
         "all": {
             "before": [],
-            "after": []
+            "after": [],
+            "abort": []
         },
         "feature": {
             "before": [],
@@ -46,8 +47,6 @@ class HookRegistry(object):
         for h in self.hooks[what][when]:
             try:
                 h(*args, **kw)
-            except KeyboardInterrupt:
-                continue
             except Exception, e:
                 return Step.FailReason(e)
         return None
@@ -57,3 +56,4 @@ for what, name in HookRegistry.possible_hooks:
 
 before = HookRegistry.Hooker("before")
 after = HookRegistry.Hooker("after")
+abort = HookRegistry.Hooker("abort")

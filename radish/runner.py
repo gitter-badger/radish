@@ -11,78 +11,85 @@ from radish.endresult import EndResult
 class Runner(object):
     def __init__(self, features):
         self._features = features
+        self._aborted = False
+
+    def abort(self):
+        hr = HookRegistry()
+        e = hr.call_hook("abort", "all")
+        if e is not None:
+            self._print_traceback(e)
+        self._aborted = True
 
     def run(self):
-        abort = False
-        interrupted = False
 
         hr = HookRegistry()
         e = hr.call_hook("before", "all")
         if e is not None:
             self._print_traceback(e)
-            abort = True
+            return self._create_endresult()
 
-        if not abort:
-            for f in self._features:
-                f.start_timetracking()
-                e = hr.call_hook("before", "feature", f)
+        abort = False
+        for f in self._features:
+            if self._aborted:
+                break
+            f.start_timetracking()
+            e = hr.call_hook("before", "feature", f)
+            if e is not None:
+                self._print_traceback(e)
+                f.stop_timetracking()
+                return self._create_endresult()
+
+            for s in f.get_scenarios():
+                if self._aborted:
+                    break
+                s.start_timetracking()
+                e = hr.call_hook("before", "scenario", s)
                 if e is not None:
                     self._print_traceback(e)
+                    s.stop_timetracking()
                     f.stop_timetracking()
                     return self._create_endresult()
+                skip_remaining_steps = False
 
-                for s in f.get_scenarios():
-                    s.start_timetracking()
-                    e = hr.call_hook("before", "scenario", s)
+                for step in s.get_steps():
+
+                    e = hr.call_hook("before", "step", step)
                     if e is not None:
                         self._print_traceback(e)
                         s.stop_timetracking()
                         f.stop_timetracking()
                         return self._create_endresult()
-                    skip_remaining_steps = False
 
-                    for step in s.get_steps():
-                        e = hr.call_hook("before", "step", step)
-                        if e is not None:
-                            self._print_traceback(e)
-                            s.stop_timetracking()
-                            f.stop_timetracking()
-                            return self._create_endresult()
+                    if not self._aborted and not skip_remaining_steps:
+                        passed = step.run()
+                        if not passed and not Config().dry_run:
+                            skip_remaining_steps = True
+                            if Config().abort_fail:
+                                abort = True
 
-                        if not skip_remaining_steps and not interrupted:
-                            try:
-                                passed = step.run()
-                                if not passed and not Config().dry_run:
-                                    skip_remaining_steps = True
-                                    if Config().abort_fail:
-                                        abort = True
-                            except KeyboardInterrupt:
-                                interrupted = True
-                                sys.stdout.write("\r")
-
-                        e = hr.call_hook("after", "step", step)
-                        if e is not None:
-                            self._print_traceback(e)
-                            s.stop_timetracking()
-                            f.stop_timetracking()
-                            return self._create_endresult()
-                    e = hr.call_hook("after", "scenario", s)
+                    e = hr.call_hook("after", "step", step)
                     if e is not None:
                         self._print_traceback(e)
                         s.stop_timetracking()
                         f.stop_timetracking()
                         return self._create_endresult()
-                    if abort:  # if -a is set
-                        break
-                    s.stop_timetracking()
-                e = hr.call_hook("after", "feature", f)
+                e = hr.call_hook("after", "scenario", s)
                 if e is not None:
                     self._print_traceback(e)
+                    s.stop_timetracking()
                     f.stop_timetracking()
                     return self._create_endresult()
                 if abort:  # if -a is set
                     break
+                s.stop_timetracking()
+            e = hr.call_hook("after", "feature", f)
+            if e is not None:
+                self._print_traceback(e)
                 f.stop_timetracking()
+                return self._create_endresult()
+            if abort:  # if -a is set
+                break
+            f.stop_timetracking()
         return self._create_endresult()
 
     def _print_traceback(self, fail_reason):

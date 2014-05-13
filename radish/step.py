@@ -49,10 +49,7 @@ class Step(Timetracker):
     def get_sentence_splitted(self):
         ur = UtilRegistry()
         if ur.has_util("split_sentence"):
-            try:
-                return ur.call_util("split_sentence", self)
-            except KeyboardInterrupt:
-                pass
+            return ur.call_util("split_sentence", self)
         splitted = [self._sentence[i:i + Step.CHARS_PER_LINE] for i in range(0, len(self._sentence), Step.CHARS_PER_LINE)]
         if Config().no_indentation:
             return len(splitted), "\n".join(splitted)
@@ -174,8 +171,6 @@ class Step(Timetracker):
                 else:
                     self._function(self, *self._match.groups())
             self._passed = not self._validation_error
-        except KeyboardInterrupt:
-            raise
         except Exception, e:
             self._passed = False
             self._fail_reason = Step.FailReason(e)

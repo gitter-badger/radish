@@ -1,4 +1,10 @@
-from radish import before, after, utils, world
+# -*- coding: utf-8 -*-
+from radish import abort, before, after, utils, world
+
+@abort.all
+def abort_all():
+    print "\r aborting ..."
+    print
 
 @before.all
 def before_all( ):
