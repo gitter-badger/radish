@@ -1,3 +1,10 @@
+radish (0.01.31)
+
+  * fix abort with Ctrl+C
+  * new hook "abort.all" to catch Ctrl+C
+
+  -- Timo Furrer <tuxtimo@gmail.com>  Wed, 14 May 2014 19:31:42 +0200
+
 radish (0.01.30)
 
   * support python < 2.7 again

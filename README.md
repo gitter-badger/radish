@@ -6,7 +6,7 @@
 
 **Author:** Timo Furrer <tuxtimo@gmail.com><br />
 **License:** GPL<br />
-**Version:** 0.01.29<br />
+**Version:** 0.01.31<br />
 
 ## <a name='TOC'></a>Table of contents
 
