@@ -74,7 +74,7 @@ class ScenarioOutlineExample(Scenario):
             # make ending newline
             scenarios = self._feature.get_scenarios()
             idx = scenarios.index(self)
-            if idx <= len(scenarios) and not isinstance(scenarios[idx + 1], ScenarioOutlineExample):
+            if idx == len(scenarios) - 1:
                 output += "\n"
         else:
             if not Config().no_indentation:
