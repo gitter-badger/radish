@@ -1,4 +1,5 @@
 # radish
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/radish-bdd/radish?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 > `radish` is a "Behavior-Driven Developement"-Tool written in python <br />
 > Version: 0.01.29
 
